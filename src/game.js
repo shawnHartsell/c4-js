@@ -9,17 +9,14 @@ export function createNew(rows, columns){
 	return Map(game);
 }
 
-//TODO: make use of Immutable.js helper methods for the mutations
 export function takeTurn(game, row, column, playerId){
-	var board = game.get("board");
-	var boardRow = board.get(`${row}`);
-	var updatedBoardRow = boardRow.set(`${column}`,playerId);
-	var updatedBoard = board.set(`${row}`,updatedBoardRow);
 
-	var updatedGame = game.set("currentPlayerTurn", playerId === 1 ? 2 : 1);
-	var updatedGame2 = updatedGame.set("board",updatedBoard);
+	var updatedGame = game.withMutations((g) => {
+			g.set("currentPlayerTurn", playerId === 1 ? 2 : 1);
+			g.setIn(["board",`${row}`,`${column}`], playerId);
+	});
 
-	return updatedGame2;
+	return updatedGame;
 }
 
 function buildGameBoard(rows, columns){
