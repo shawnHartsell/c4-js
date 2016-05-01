@@ -4,7 +4,7 @@
   "description": "connect 4 clone",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require babel-register ./test/test_helper.js --recursive",
+    "test": "mocha --require babel-register --recursive",
     "test:watch": "npm run test -- --watch"
   },
   "author": "shawn hartsell",
