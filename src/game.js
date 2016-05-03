@@ -108,7 +108,7 @@ export function isVerticalWin(gameBoard, positions, playerId) {
 	let reducer = (result, curPos) => {
 		if(result.prevPos){
 			result.distance = result.prevPos.row - curPos.row;
-			result.prev = curPos;
+			result.prevPos = curPos;
 		}
 		else {
 			result.prevPos = curPos;
