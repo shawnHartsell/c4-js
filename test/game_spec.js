@@ -43,6 +43,7 @@ describe('game', () => {
 	   let [row,column] = [2,3];
 	   let expectedPositions = {
 			vertical:[
+				{ row: 2, column: 3 },
 				{ row: 1, column: 3 },
 				{ row: 3, column: 3 },
 				{ row: 0, column: 3 },
@@ -50,6 +51,7 @@ describe('game', () => {
 				{ row: 5, column: 3 }
 			],
 			horizontal:[
+				{ row: 2, column: 3 },
 				{ row: 2, column: 2 },
 				{ row: 2, column: 4 },
 				{ row: 2, column: 1 },
@@ -58,6 +60,7 @@ describe('game', () => {
 				{ row: 2, column: 6 }
 			],
 			diagonal:[
+				{ row: 2, column: 3 },
 				{ row: 1, column: 2 },
 				{ row: 3, column: 4 },
 				{ row: 0, column: 1 },
@@ -69,4 +72,18 @@ describe('game', () => {
 	   let positions = gameApi.getWinningPositions(game.get("size"), row, column);
 	   expect(positions).to.deep.equal(expectedPositions);
    });
+
+   //TODO: need to test against larger, more relaistics boards
+   //I bet there are edge cases
+   it('can determine super naive vertical win', ()=>{
+	   let game = gameApi.createNew(4,1);
+	   game = gameApi.takeTurn(game, 0, 0, 1);
+	   game = gameApi.takeTurn(game, 1, 0, 1);
+	   game = gameApi.takeTurn(game, 2, 0, 1);
+	   game = gameApi.takeTurn(game, 3, 0, 1);
+
+	   let positions = gameApi.getWinningPositions(game.get("size"), 3, 0, 1);
+	   let isWin = gameApi.isVerticalWin(game.get("board"), positions.vertical, 1);
+	   expect(isWin).to.equal(true);
+   })
 });

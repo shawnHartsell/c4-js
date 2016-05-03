@@ -1,4 +1,5 @@
 import {OrderedMap, List, Map} from 'immutable'
+import * as R from 'ramda';
 
 export function createNew(rows, columns){
 	var game = {};
@@ -24,6 +25,7 @@ export function takeTurn(game, row, column, playerId){
 }
 
 export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playerId){
+	let curMove = {row: lastMoveRow, column: lastMoveColumn};
 	let maxRowIndex = gameSize.maxRowIndex;
 	let maxColumnIndex = gameSize.maxColumnIndex;
 
@@ -32,6 +34,11 @@ export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playe
 		horizontal: [],
 		diagonal: []
 	};
+
+	//add the current move to each position collection
+	positions.vertical.push(curMove);
+	positions.horizontal.push(curMove);
+	positions.diagonal.push(curMove);
 
 	for(var i = 1; i <= 3; i++){
 		let isPrevRowValid = (lastMoveRow - i >= 0);
@@ -69,6 +76,49 @@ export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playe
 
 	return positions;
 
+}
+
+//TODO: Make this more concise
+//TODO: Can probably generalize the math for each calculation
+export function isVerticalWin(gameBoard, positions, playerId) {
+
+	//sort the positions in descending order
+	var sortedPositions = R.sort((a,b) => b.row - a.row, positions);
+
+	/* example
+	{ row: 5, column: 3 }
+	{ row: 4, column: 3 }
+	{ row: 3, column: 3 }
+	{ row: 2, column: 3 }
+	{ row: 1, column: 3 }
+	{ row: 0, column: 3 }
+	 */
+
+	//get the positions that the player occupies
+	var isMatch = p => gameBoard[p.row][p.column] === playerId;
+	var occupiedPositions = R.filter(isMatch, sortedPositions);
+
+	// if the player doesn't occupy 4 positions then they did not win
+	if(occupiedPositions < 4){
+		return false;
+	}
+
+	//if there are 4 and the distance between each position is one there are 4 in a row
+	//TODO: if this works, take advantage of R.reduced continuation to short circuit the iteration
+	let reducer = (result, curPos) => {
+		if(result.prevPos){
+			result.distance = result.prevPos.row - curPos.row;
+			result.prev = curPos;
+		}
+		else {
+			result.prevPos = curPos;
+		}
+
+		return result;
+	};
+
+	var result = R.reduce(reducer, { distance: 0 }, occupiedPositions);
+	return result.distance === 1;
 }
 
 function buildGameBoard(rows, columns){
