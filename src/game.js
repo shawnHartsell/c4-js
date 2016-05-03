@@ -13,8 +13,11 @@ export function createNew(rows, columns){
 export function takeTurn(game, row, column, playerId){
 
 	var updatedGame = game.withMutations((g) => {
+			let board = g.get("board");
+			board[row][column] = playerId;
+
+			g.set("board", board);
 			g.set("currentPlayerTurn", playerId === 1 ? 2 : 1);
-			g.setIn(["board",`${row}`,`${column}`], playerId);
 	});
 
 	return updatedGame;
@@ -68,13 +71,16 @@ export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playe
 
 }
 
-//TODO: refactor to 2D array
 function buildGameBoard(rows, columns){
-	 var obj = {};
+	 var board = [];
 
      for (var i = 0; i < rows; i++) {
-        obj[i] = List().setSize(columns);
+    	var row = [];
+		for(var j = 0; j < columns; j++) {
+			row.push(0);
+		}
+		board.push(row);
      }
 
-     return OrderedMap(obj);
+     return board;
 }

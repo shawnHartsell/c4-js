@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "immutable": "^3.8.1",
+    "ramda": "^0.21.0",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "redux": "^3.5.2"

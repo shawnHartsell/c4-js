@@ -1,6 +1,7 @@
 import * as gameApi from '../src/game';
 import chai from 'chai';
 import {expect} from 'chai';
+import * as R from 'ramda';
 
 describe('game', () => {
    it('can create game', ()=>{
@@ -12,15 +13,13 @@ describe('game', () => {
 		expect(game.get("winningPlayer")).to.not.be.ok;
 
 		var board = game.get("board");
-		var boardRows = board.entrySeq();
 
-        expect(boardRows.size).to.equal(rows);
+		expect(board.length).to.equal(rows);
 
-        var hasAllColumns = boardRows.every(entry => {
-           return entry[1].size === columns;
-        });
+        var allColumnsInitialized = R.all(column => !column);
+		var hasAllColumns = R.all(row => row.length === columns && allColumnsInitialized(row));
 
-        expect(hasAllColumns).to.equal(true);
+        expect(hasAllColumns(board)).to.equal(true);
    });
 
    it('can take turn with no winning move', () => {
@@ -31,7 +30,7 @@ describe('game', () => {
 
 	   expect(state).to.be.ok;
 	   expect(state.get("currentPlayerTurn")).to.equal(2);
-	   expect(state.get("board").get(`${row}`).get(`${column}`)).to.equal(playerId);
+	   expect(state.get("board")[row][column]).to.equal(playerId);
 	   expect(state.get("winningPlayer")).to.not.be.ok;
    });
 
