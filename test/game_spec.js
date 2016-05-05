@@ -101,4 +101,18 @@ describe('game', () => {
 	 let isWin = gameApi.isHorizontalWin(game.get("board"), positions.horizontal, 1);
 	 expect(isWin).to.equal(true); 
    });
+   
+   it('can determine somewhat realistic diagonal win', ()=>{	  
+	  let game = gameApi.createNew(6,7);
+	  game = gameApi.takeTurn(game, 0, 0, 2);
+	  game = gameApi.takeTurn(game, 1, 1, 1);
+	  game = gameApi.takeTurn(game, 2, 2, 1);
+	  game = gameApi.takeTurn(game, 3, 3, 1);
+	  game = gameApi.takeTurn(game, 4, 4, 1);
+	  game = gameApi.takeTurn(game, 5, 5, 2);
+
+	  let positions = gameApi.getWinningPositions(game.get("size"), 2, 2, 1);
+	  let isWin = gameApi.isDiagonalWin(game.get("board"), positions.diagonal, 1);
+	  expect(isWin).to.equal(true); 
+   });
 });

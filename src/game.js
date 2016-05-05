@@ -86,15 +86,6 @@ export function isVerticalWin(gameBoard, positions, playerId) {
 	//sort the positions in descending order
 	var sortedPositions = R.sort((a,b) => b.row - a.row, positions);
 
-	/* example
-	{ row: 5, column: 3 }
-	{ row: 4, column: 3 }
-	{ row: 3, column: 3 }
-	{ row: 2, column: 3 }
-	{ row: 1, column: 3 }
-	{ row: 0, column: 3 }
-	 */
-
 	//get the positions that the player occupies
 	var isMatch = p => gameBoard[p.row][p.column] === playerId;
 	var occupiedPositions = R.filter(isMatch, sortedPositions);
@@ -132,15 +123,7 @@ export function isHorizontalWin(gameBoard, positions, playerId) {
 	if(occupiedPositions < 4) {
 		return false;
 	}
-	
-	/*
-	{ row: 0, column: 5 }
-	{ row: 0, column: 4 }
-	{ row: 0, column: 3 }
-	{ row: 0, column: 2 }
-	{ row: 0, column: 0 }
-	*/
-		
+			
 	//TODO: Refactor to use slice, pipe, continuation, etc
 	//count number of adjacent occupied positions
 	let reducer = (result, curPos) => {
@@ -150,6 +133,38 @@ export function isHorizontalWin(gameBoard, positions, playerId) {
 			let distance = curPos.column - nextPos.column
 			
 			if(distance === 1){
+				result.adjacentPositions++;
+			}
+			
+			result.curIndex++;
+		}
+		
+		return result;
+	};
+	
+	let result = R.reduce(reducer, {adjacentPositions: 1, curIndex: 0}, occupiedPositions);
+	return result.adjacentPositions === 4;
+}
+
+export function isDiagonalWin(gameBoard, positions, playerId) {
+	var sortedPositions = R.sort((a,b) => b.row - a.row, positions);
+	
+	var isMatch = p => gameBoard[p.row][p.column] === playerId;
+	var occupiedPositions = R.filter(isMatch, sortedPositions);
+		
+	if(occupiedPositions < 4) {
+		return false;
+	}
+	
+	let reducer = (result, curPos) => {
+		//no-op if at the last occupied position
+		if(result.curIndex !== occupiedPositions.length - 1) {
+			
+			let nextPos = occupiedPositions[result.curIndex + 1];
+			let rowDistance = curPos.row - nextPos.row;
+			let columnDistance = curPos.column - nextPos.column;
+
+			if(rowDistance === 1 && columnDistance === 1){
 				result.adjacentPositions++;
 			}
 			
