@@ -80,6 +80,7 @@ export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playe
 
 //TODO: Make this more concise
 //TODO: Can probably generalize the math for each calculation
+//TODO: Should probably count adjencies instead of current math
 export function isVerticalWin(gameBoard, positions, playerId) {
 
 	//sort the positions in descending order
@@ -112,13 +113,54 @@ export function isVerticalWin(gameBoard, positions, playerId) {
 		}
 		else {
 			result.prevPos = curPos;
-		}
+		};
 
 		return result;
 	};
 
 	var result = R.reduce(reducer, { distance: 0 }, occupiedPositions);
 	return result.distance === 1;
+}
+
+export function isHorizontalWin(gameBoard, positions, playerId) {
+
+	var sortedPositions = R.sort((a,b) => b.column - a.column, positions);
+	
+	var isMatch = p => gameBoard[p.row][p.column] === playerId;
+	var occupiedPositions = R.filter(isMatch, sortedPositions);
+	
+	if(occupiedPositions < 4) {
+		return false;
+	}
+	
+	/*
+	{ row: 0, column: 5 }
+	{ row: 0, column: 4 }
+	{ row: 0, column: 3 }
+	{ row: 0, column: 2 }
+	{ row: 0, column: 0 }
+	*/
+		
+	//TODO: Refactor to use slice, pipe, continuation, etc
+	//count number of adjacent occupied positions
+	let reducer = (result, curPos) => {
+		//no-op if at the last occupied position
+		if(result.curIndex !== occupiedPositions.length - 1) {
+			let nextPos = occupiedPositions[result.curIndex + 1];
+			let distance = curPos.column - nextPos.column
+			
+			if(distance === 1){
+				result.adjacentPositions++;
+			}
+			
+			result.curIndex++;
+		}
+		
+		return result;
+	};
+	
+	let result = R.reduce(reducer, {adjacentPositions: 1, curIndex: 0}, occupiedPositions);
+	return result.adjacentPositions === 4;
 }
 
 function buildGameBoard(rows, columns){

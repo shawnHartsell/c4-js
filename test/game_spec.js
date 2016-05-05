@@ -85,5 +85,20 @@ describe('game', () => {
 	   let positions = gameApi.getWinningPositions(game.get("size"), 3, 0, 1);
 	   let isWin = gameApi.isVerticalWin(game.get("board"), positions.vertical, 1);
 	   expect(isWin).to.equal(true);
-   })
+   });
+   
+   it('can determine somewhat realistic horizontal win', ()=>{
+	  let game = gameApi.createNew(1,7);
+	  game = gameApi.takeTurn(game, 0, 0, 1);
+	  game = gameApi.takeTurn(game, 0, 1, 2);
+	  game = gameApi.takeTurn(game, 0, 3, 1);
+	  game = gameApi.takeTurn(game, 0, 4, 1);
+	  game = gameApi.takeTurn(game, 0, 5, 1);
+	  game = gameApi.takeTurn(game, 0, 6, 2);
+	  game = gameApi.takeTurn(game, 0, 2, 1);
+	  
+	 let positions = gameApi.getWinningPositions(game.get("size"), 0, 2, 1);
+	 let isWin = gameApi.isHorizontalWin(game.get("board"), positions.horizontal, 1);
+	 expect(isWin).to.equal(true); 
+   });
 });
