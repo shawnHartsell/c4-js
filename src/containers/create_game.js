@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { connect } from 'react-redux'
 import { createGame } from '../actions'
@@ -34,4 +35,4 @@ class CreateGame extends React.Component {
     };
 };
 
-export default connect()(CreateGame);
+export default connect()(CreateGame)
