@@ -11,15 +11,25 @@ export const createNew = (rows, columns) => (
   })
 );
 
-//TODO: determine winner
-//TODO: check if move is "valid"
+//TODO: check if move is "valid" (i.e. correct player turn, simulate piece dropping, etc)
 export const takeTurn = (game, row, column, playerId) => (
-  game.withMutations((g) => {
+
+   game.withMutations((g) => {
     const board = g.get('board');
     board[row][column] = playerId;
 
     g.set('board', board);
     g.set('currentPlayerTurn', playerId === 1 ? 2 : 1);
+
+    const isWin = R.pipe(
+      R.curry(getWinningPositions),
+      R.mapObjIndexed((positions, direction, obj) =>
+        calculateWin(g.get('board'), positions, playerId, winStrategies[direction])),
+      R.values,
+      R.any(a => a === true)
+    );
+
+    g.set('winningPlayer', isWin(game.get, row, column, playerId) ? playerId : undefined);
   })
 );
 
@@ -77,31 +87,32 @@ export const getWinningPositions = (gameSize, lastMoveRow, lastMoveColumn, playe
 };
 
 export const isVerticalWin = (gameBoard, positions, playerId) =>
-  calculateWin(gameBoard, positions, playerId, verticalWinStrategy);
+  calculateWin(gameBoard, positions, playerId, winStrategies.vertical);
 
 export const isHorizontalWin = (gameBoard, positions, playerId) =>
-  calculateWin(gameBoard, positions, playerId, horizontalWinStrategy);
+  calculateWin(gameBoard, positions, playerId, winStrategies.horizontal);
 
 export const isDiagonalWin = (gameBoard, positions, playerId) =>
-  calculateWin(gameBoard, positions, playerId, diagonalWinStrategy);
+    calculateWin(gameBoard, positions, playerId, winStrategies.diagonal);
 
-const verticalWinStrategy = {
-  sortFn: (a, b) => b.row - a.row,
-  isAdjacent: (curPos, nextPos) => curPos.row - nextPos.row === 1,
-};
-
-const horizontalWinStrategy = {
-  sortFn: (a, b) => b.column - a.column,
-  isAdjacent: (curPos, nextPos) => curPos.column - nextPos.column === 1,
-};
-
-const diagonalWinStrategy = {
-  sortFn: (a, b) => b.row - a.row,
-  isAdjacent: (curPos, nextPos) => {
+const winStrategies = {
+  horizontal: {
+    type: 'horizontal',
+    sortFn: (a, b) => b.column - a.column,
+    isAdjacent: (curPos, nextPos) => curPos.column - nextPos.column === 1,
+  },
+  vertical: {
+        sortFn: (a, b) => b.row - a.row,
+        isAdjacent: (curPos, nextPos) => curPos.row - nextPos.row === 1,
+      },
+  diagonal: {
+    sortFn: (a, b) => b.row - a.row,
+    isAdjacent: (curPos, nextPos) => {
       const rowDistance = curPos.row - nextPos.row;
       const columnDistance = curPos.column - nextPos.column;
       return rowDistance === 1 && columnDistance === 1;
     },
+  },
 };
 
 const calculateWin = (gameBoard, positions, player, winStrategy) => {

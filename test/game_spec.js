@@ -26,12 +26,24 @@ describe('game', () => {
     let game = gameApi.createNew(6, 7);
     let [row, column, playerId] = [4, 4, 1];
 
-    var state = gameApi.takeTurn(game, row, column, playerId);
+    let state = gameApi.takeTurn(game, row, column, playerId);
 
     expect(state).to.be.ok;
     expect(state.get('currentPlayerTurn')).to.equal(2);
     expect(state.get('board')[row][column]).to.equal(playerId);
     expect(state.get('winningPlayer')).to.not.be.ok;
+  });
+
+  it('can take turn with winning move', () => {
+    let game = gameApi.createNew(6, 7);
+    game = gameApi.takeTurn(game, 0, 0, 1);
+    game = gameApi.takeTurn(game, 1, 0, 1);
+    game = gameApi.takeTurn(game, 2, 0, 1);
+    game = gameApi.takeTurn(game, 3, 0, 1);
+
+    expect(game).to.be.ok;
+    expect(game.get('currentPlayerTurn')).to.equal(2);
+    expect(game.get('winningPlayer')).to.equal(1);
   });
 
   /*
