@@ -2,38 +2,33 @@ import { OrderedMap, List, Map } from 'immutable';
 import * as R from 'ramda';
 
 //TODO: need something to know when there are no more moves
-
-export function createNew(rows, columns) {
-  var game = {};
-  game.board = buildGameBoard(rows, columns);
-  game.currentPlayerTurn = 1;
-  game.winningPlayer = undefined;
-  game.size = { maxRowIndex: rows - 1, maxColumnIndex: columns - 1 };
-
-  return Map(game);
-}
+export const createNew = (rows, columns) => (
+  Map({
+    board: buildGameBoard(rows, columns),
+    currentPlayerTurn: 1,
+    winningPlayer: undefined,
+    size: { maxRowIndex: rows - 1, maxColumnIndex: columns - 1 },
+  })
+);
 
 //TODO: determine winner
 //TODO: check if move is "valid"
-export function takeTurn(game, row, column, playerId) {
-
-  var updatedGame = game.withMutations((g) => {
-    let board = g.get('board');
+export const takeTurn = (game, row, column, playerId) => (
+  game.withMutations((g) => {
+    const board = g.get('board');
     board[row][column] = playerId;
 
     g.set('board', board);
     g.set('currentPlayerTurn', playerId === 1 ? 2 : 1);
-  });
+  })
+);
 
-  return updatedGame;
-}
+export const getWinningPositions = (gameSize, lastMoveRow, lastMoveColumn, playerId) => {
+  const curMove = { row: lastMoveRow, column: lastMoveColumn };
+  const maxRowIndex = gameSize.maxRowIndex;
+  const maxColumnIndex = gameSize.maxColumnIndex;
 
-export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playerId) {
-  let curMove = { row: lastMoveRow, column: lastMoveColumn };
-  let maxRowIndex = gameSize.maxRowIndex;
-  let maxColumnIndex = gameSize.maxColumnIndex;
-
-  let positions = {
+  const positions = {
     vertical: [],
     horizontal: [],
     diagonal: [],
@@ -79,113 +74,71 @@ export function getWinningPositions(gameSize, lastMoveRow, lastMoveColumn, playe
   }
 
   return positions;
+};
 
-}
+export const isVerticalWin = (gameBoard, positions, playerId) =>
+  calculateWin(gameBoard, positions, playerId, verticalWinStrategy);
 
-//TODO: Make this more concise
-//TODO: Can probably generalize the math for each calculation
-//TODO: Should probably count adjencies instead of current math
-export function isVerticalWin(gameBoard, positions, playerId) {
+export const isHorizontalWin = (gameBoard, positions, playerId) =>
+  calculateWin(gameBoard, positions, playerId, horizontalWinStrategy);
 
-  //sort the positions in descending order
-  var sortedPositions = R.sort((a, b) => b.row - a.row, positions);
+export const isDiagonalWin = (gameBoard, positions, playerId) =>
+  calculateWin(gameBoard, positions, playerId, diagonalWinStrategy);
 
-  //get the positions that the player occupies
-  var isMatch = p => gameBoard[p.row][p.column] === playerId;
-  var occupiedPositions = R.filter(isMatch, sortedPositions);
+const verticalWinStrategy = {
+  sortFn: (a, b) => b.row - a.row,
+  isAdjacent: (curPos, nextPos) => curPos.row - nextPos.row === 1,
+};
 
-  // if the player doesn't occupy 4 positions then they did not win
-  if (occupiedPositions < 4) {
-    return false;
-  }
+const horizontalWinStrategy = {
+  sortFn: (a, b) => b.column - a.column,
+  isAdjacent: (curPos, nextPos) => curPos.column - nextPos.column === 1,
+};
 
-  //if there are 4 and the distance between each position is one there are 4 in a row
-  //TODO: if this works, take advantage of R.reduced continuation to short circuit the iteration
-  let reducer = (result, curPos) => {
-    if (result.prevPos) {
-      result.distance = result.prevPos.row - curPos.row;
-      result.prevPos = curPos;
-    } else {
-      result.prevPos = curPos;
+const diagonalWinStrategy = {
+  sortFn: (a, b) => b.row - a.row,
+  isAdjacent: (curPos, nextPos) => {
+      const rowDistance = curPos.row - nextPos.row;
+      const columnDistance = curPos.column - nextPos.column;
+      return rowDistance === 1 && columnDistance === 1;
+    },
+};
+
+const calculateWin = (gameBoard, positions, player, winStrategy) => {
+  const calculateAdjacentPos = (occupiedPos) => {
+
+    const reducer = (result, curPos) => {
+      //no-op if at the last occupied position
+      if (result.curIndex !== occupiedPos.length - 1) {
+        let nextPos = occupiedPos[result.curIndex + 1];
+
+        if (winStrategy.isAdjacent(curPos, nextPos)) {
+          result.adjacentPositions++;
+        }
+
+        result.curIndex++;
+      }
+
+      return result;
     };
 
-    return result;
+    return R.reduce(reducer, { adjacentPositions: 1, curIndex: 0 }, occupiedPos).adjacentPositions;
   };
 
-  var result = R.reduce(reducer, { distance: 0 }, occupiedPositions);
-  return result.distance === 1;
-}
+  const isWin = R.pipe(
+    R.sort(winStrategy.sortFn),
+    R.filter(pos => gameBoard[pos.row][pos.column] === player),
+    calculateAdjacentPos,
+    adjacentPos => adjacentPos === 4);
 
-export function isHorizontalWin(gameBoard, positions, playerId) {
+  return isWin(positions);
+};
 
-  var sortedPositions = R.sort((a, b) => b.column - a.column, positions);
+const buildGameBoard = (rows, columns) => {
+  let board = [];
 
-  var isMatch = p => gameBoard[p.row][p.column] === playerId;
-  var occupiedPositions = R.filter(isMatch, sortedPositions);
-
-  if (occupiedPositions < 4) {
-    return false;
-  }
-
-  //TODO: Refactor to use slice, pipe, continuation, etc
-  //count number of adjacent occupied positions
-  let reducer = (result, curPos) => {
-    //no-op if at the last occupied position
-    if (result.curIndex !== occupiedPositions.length - 1) {
-      let nextPos = occupiedPositions[result.curIndex + 1];
-      let distance = curPos.column - nextPos.column;
-
-      if (distance === 1) {
-        result.adjacentPositions++;
-      }
-
-      result.curIndex++;
-    }
-
-    return result;
-  };
-
-  let result = R.reduce(reducer, { adjacentPositions: 1, curIndex: 0 }, occupiedPositions);
-  return result.adjacentPositions === 4;
-}
-
-export function isDiagonalWin(gameBoard, positions, playerId) {
-  var sortedPositions = R.sort((a, b) => b.row - a.row, positions);
-
-  var isMatch = p => gameBoard[p.row][p.column] === playerId;
-  var occupiedPositions = R.filter(isMatch, sortedPositions);
-
-  if (occupiedPositions < 4) {
-    return false;
-  }
-
-  let reducer = (result, curPos) => {
-    //no-op if at the last occupied position
-    if (result.curIndex !== occupiedPositions.length - 1) {
-
-      let nextPos = occupiedPositions[result.curIndex + 1];
-      let rowDistance = curPos.row - nextPos.row;
-      let columnDistance = curPos.column - nextPos.column;
-
-      if (rowDistance === 1 && columnDistance === 1) {
-        result.adjacentPositions++;
-      }
-
-      result.curIndex++;
-    }
-
-    return result;
-  };
-
-  let result = R.reduce(reducer, { adjacentPositions: 1, curIndex: 0 }, occupiedPositions);
-  return result.adjacentPositions === 4;
-}
-
-function buildGameBoard(rows, columns) {
-  var board = [];
-
-  for (var i = 0; i < rows; i++) {
-    var row = [];
+  for (let i = 0; i < rows; i++) {
+    let row = [];
     for (var j = 0; j < columns; j++) {
       row.push(0);
     }
@@ -194,4 +147,4 @@ function buildGameBoard(rows, columns) {
   }
 
   return board;
-}
+};
