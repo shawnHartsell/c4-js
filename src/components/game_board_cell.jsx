@@ -13,7 +13,6 @@ const GameBoardCell = ({ playerId, onTakeTurn }) => { //jscs:ignore requireShort
       onClick={onTakeTurn}
       playerId={playerId}
       disabled={playerId ? true : false} >
-    {playerId ? playerId : ''}
     </Button>);
 };
 
