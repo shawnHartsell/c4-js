@@ -7,9 +7,8 @@ export const createGame = (rows, columns) => ({
     columns: columns,
   });
 
-export const takeTurn = (row, column, playerId) => ({
+export const takeTurn = (row, column) => ({
         type: TAKE_TURN,
-        playerId: playerId,
         row: row,
         column: column,
       });

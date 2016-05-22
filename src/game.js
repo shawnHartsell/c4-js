@@ -1,6 +1,15 @@
 import { OrderedMap, List, Map } from 'immutable';
 import * as R from 'ramda';
 
+export const init = () => (
+    Map({
+      board: buildGameBoard(0, 0),
+      currentPlayerTurn: 1,
+      winningPlayer: undefined,
+      size: { maxRowIndex: 0, maxColumnIndex: 0 },
+    })
+);
+
 //TODO: need something to know when there are no more moves
 export const createNew = (rows, columns) => (
   Map({
@@ -12,26 +21,26 @@ export const createNew = (rows, columns) => (
 );
 
 //TODO: check if move is "valid" (i.e. correct player turn, simulate piece dropping, etc)
-export const takeTurn = (game, row, column, playerId) => (
-
-   game.withMutations((g) => {
+export const takeTurn = (game, row, column) => {
+  return game.withMutations((g) => {
     const board = g.get('board');
-    board[row][column] = playerId;
-
-    g.set('board', board);
-    g.set('currentPlayerTurn', playerId === 1 ? 2 : 1);
+    const curPlayerTurn = game.get('currentPlayerTurn');
 
     const isWin = R.pipe(
       R.curry(getWinningPositions),
       R.mapObjIndexed((positions, direction, obj) =>
-        calculateWin(g.get('board'), positions, playerId, winStrategies[direction])),
+        calculateWin(g.get('board'), positions, curPlayerTurn, winStrategies[direction])),
       R.values,
       R.any(a => a === true)
     );
 
-    g.set('winningPlayer', isWin(game.get, row, column, playerId) ? playerId : undefined);
-  })
-);
+    board[row][column] = curPlayerTurn;
+    g.set('board', board);
+    g.set('currentPlayerTurn', curPlayerTurn === 1 ? 2 : 1);
+    g.set('winningPlayer', isWin(game.get, row, column, curPlayerTurn) ? curPlayerTurn : undefined);
+
+  });
+};
 
 export const getWinningPositions = (gameSize, lastMoveRow, lastMoveColumn, playerId) => {
   const curMove = { row: lastMoveRow, column: lastMoveColumn };
