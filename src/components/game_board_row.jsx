@@ -11,9 +11,6 @@ const GameBoardRow = ({ row, rowIndex, onTakeTurn }) => {
         onTakeTurn={() => { onTakeTurn(rowIndex, columnIndex); }} />);
     });
 
-    console.dir('rendering row' + rowIndex);
-    console.dir(cells);
-
     return <ButtonToolbar>{ cells }</ButtonToolbar>;
   };
 

@@ -21,8 +21,8 @@ export const createNew = (rows, columns) => (
 );
 
 //TODO: check if move is "valid" (i.e. correct player turn, simulate piece dropping, etc)
-export const takeTurn = (game, row, column) => {
-  return game.withMutations((g) => {
+export const takeTurn = (game, row, column) => (
+  game.withMutations((g) => {
     const board = g.get('board');
     const curPlayerTurn = game.get('currentPlayerTurn');
 
@@ -38,9 +38,8 @@ export const takeTurn = (game, row, column) => {
     g.set('board', board);
     g.set('currentPlayerTurn', curPlayerTurn === 1 ? 2 : 1);
     g.set('winningPlayer', isWin(game.get, row, column, curPlayerTurn) ? curPlayerTurn : undefined);
-
-  });
-};
+  })
+);
 
 export const getWinningPositions = (gameSize, lastMoveRow, lastMoveColumn, playerId) => {
   const curMove = { row: lastMoveRow, column: lastMoveColumn };

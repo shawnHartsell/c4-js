@@ -5,7 +5,7 @@ import GameBoard from '../components/game_board';
 const mapStateToProps = (state) => {
   console.dir('in container');
   console.dir(state.get('board'));
-  return { game: state.get('board') };
+  return { game: state };
 };
 
 const mapDispatchToProps = (dispatch) => (

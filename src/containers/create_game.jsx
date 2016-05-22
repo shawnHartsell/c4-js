@@ -1,4 +1,3 @@
-
 import React from 'react'
 import { connect } from 'react-redux';
 import { createGame } from '../actions';
@@ -8,7 +7,7 @@ class CreateGame extends React.Component {
         super(props);
         this._handleRows = this._handleRows.bind(this);
         this._handleColumns = this._handleColumns.bind(this);
-        this.state = {rows: 2, columns: 2}
+        this.state = {rows: 6, columns: 7}
     }
 
     render() {
