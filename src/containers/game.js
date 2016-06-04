@@ -2,9 +2,7 @@ import { connect } from 'react-redux';
 import { takeTurn } from '../actions';
 import GameBoard from '../components/game_board';
 
-const mapStateToProps = (state) => {
-  console.dir('in container');
-  console.dir(state.get('board'));
+const mapStateToProps = (state) => {//jscs:ignore requireShorthandArrowFunctions
   return { game: state };
 };
 
