@@ -4,23 +4,24 @@ import { connect } from 'react-redux';
 import { resetGame } from '../actions';
 
 const mapStateToProps = (state) => ({
-     winner: state.get('winningPlayer')
+     winner: state.get('winningPlayer'),
+     remainingTurns: state.get('remainingTurns'),
 });
 
 class EndGame extends React.Component {
   constructor(props) {
     super(props);
-    this._getWinMessage = this._getWinMessage.bind(this);
+    this._getMessage = this._getMessage.bind(this);
     this._onClose = this._onClose.bind(this);
   };
 
   render() {
     return (
-      <Modal dialogClassName="end-game-modal" show={this.props.winner ? true : false}>
+      <Modal dialogClassName="end-game-modal" show={ this.props.winner || !this.props.remainingTurns ? true : false}>
         <Modal.Header>
           <Modal.Title>Game Over</Modal.Title>
           <Modal.Body>
-            <h4>{this._getWinMessage()}</h4>
+            <h4>{this._getMessage()}</h4>
           </Modal.Body>
           <Modal.Footer>
             <Button
@@ -40,20 +41,21 @@ class EndGame extends React.Component {
     this.setState({showModal: false});
   }
 
-  _getWinMessage() {
+  _getMessage() {
+    const remainingTurns = this.props.remainingTurns;
+    const winner = this.props.winner;
     let winningPlayerColor;
 
-    switch (this.props.winner) {
-      case 1:
-        winningPlayerColor = 'Red';
-        break;
-      case 2:
-        winningPlayerColor = 'Blue';
-        break;
-      default:
+    if(remainingTurns && !winner) {
+      return '';
     }
 
-    return winningPlayerColor ? `Congrats ${winningPlayerColor} Player, You Win!` : '';
+    if(!(remainingTurns || winner)) {
+      return 'Good Job! The Game Ended In A Tie! Both Players Win!'
+    }
+
+    const playerWinMsg = winner === 1 ? 'Red Player' : 'Blue Player';
+    return `Good Job ${playerWinMsg}! You Win!`
   };
 };
 

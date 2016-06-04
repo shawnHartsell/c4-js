@@ -4,29 +4,33 @@ import { expect } from 'chai';
 import * as R from 'ramda';
 
 describe('game', () => {
+  it('can initializeGame', () => {
+    const game = gameApi.init();
+    expect(game.get('currentPlayerTurn')).to.equal(1);
+    expect(game.get('winningPlayer')).to.not.be.ok;
+    expect(game.get('remainingTurns')).to.equal(1);
+    expect(game.get('isInit')).to.be.ok;
+    expect(game.get('size')).to.deep.equal({ maxRowIndex: 0, maxColumnIndex: 0 });
+  });
+
   it('can create game', ()=> {
-      let rows = 6;
-      let columns = 7;
-      let game = gameApi.createNew(6, 7);
+      const rows = 6;
+      const columns = 7;
+      const game = gameApi.createNew(6, 7);
+      const board = game.get('board');
+      const allColumnsInitialized = R.all(column => !column);
+      const hasAllColumns = R.all(row => row.length === columns && allColumnsInitialized(row));
 
       expect(game.get('currentPlayerTurn')).to.equal(1);
       expect(game.get('winningPlayer')).to.not.be.ok;
-
-      var board = game.get('board');
-
       expect(board.length).to.equal(rows);
-
-      var allColumnsInitialized = R.all(column => !column);
-      var hasAllColumns = R.all(row => row.length === columns && allColumnsInitialized(row));
-
       expect(hasAllColumns(board)).to.equal(true);
     });
 
   it('can take turn with no winning move', () => {
-    let game = gameApi.createNew(6, 7);
-    let [row, column, playerId] = [4, 4, 1];
-
-    let state = gameApi.takeTurn(game, row, column, playerId);
+    const game = gameApi.createNew(6, 7);
+    const [row, column, playerId] = [4, 4, 1];
+    const state = gameApi.takeTurn(game, row, column, playerId);
 
     expect(state).to.be.ok;
     expect(state.get('currentPlayerTurn')).to.equal(2);
@@ -36,10 +40,13 @@ describe('game', () => {
 
   it('can take turn with winning move', () => {
     let game = gameApi.createNew(6, 7);
-    game = gameApi.takeTurn(game, 0, 0, 1);
-    game = gameApi.takeTurn(game, 1, 0, 1);
-    game = gameApi.takeTurn(game, 2, 0, 1);
-    game = gameApi.takeTurn(game, 3, 0, 1);
+    game = gameApi.takeTurn(game, 0, 0);
+    game = gameApi.takeTurn(game, 0, 1);
+    game = gameApi.takeTurn(game, 1, 0);
+    game = gameApi.takeTurn(game, 0, 2);
+    game = gameApi.takeTurn(game, 2, 0);
+    game = gameApi.takeTurn(game, 0, 3);
+    game = gameApi.takeTurn(game, 3, 0);
 
     expect(game).to.be.ok;
     expect(game.get('currentPlayerTurn')).to.equal(2);
@@ -51,9 +58,9 @@ describe('game', () => {
   	Refactor so that assert doesn't rely on array element order
 	or modify data structure of getWinningPositions	*/
   it('can determine winning positions', ()=> {
-    let game = gameApi.createNew(6, 7);
-    let [row, column] = [2, 3];
-    let expectedPositions = {
+    const game = gameApi.createNew(6, 7);
+    const [row, column] = [2, 3];
+    const expectedPositions = {
       vertical: [
        { row: 2, column: 3 },
        { row: 1, column: 3 },
@@ -81,50 +88,46 @@ describe('game', () => {
       ],
     };
 
-    let positions = gameApi.getWinningPositions(game.get('size'), row, column);
+    const positions = gameApi.getWinningPositions(game.get('size'), row, column);
     expect(positions).to.deep.equal(expectedPositions);
   });
 
-  //TODO: need to test against larger, more relaistics boards
-  //I bet there are edge cases
-  it('can determine super naive vertical win', ()=> {
-    let game = gameApi.createNew(4, 1);
-    game = gameApi.takeTurn(game, 0, 0, 1);
-    game = gameApi.takeTurn(game, 1, 0, 1);
-    game = gameApi.takeTurn(game, 2, 0, 1);
-    game = gameApi.takeTurn(game, 3, 0, 1);
+  it('can determine somewhat realistic vertical win', () => {
+    let game = gameApi.createNew(6, 7);
+    game = gameApi.takeTurn(game, 0, 0);
+    game = gameApi.takeTurn(game, 0, 1);
+    game = gameApi.takeTurn(game, 1, 0);
+    game = gameApi.takeTurn(game, 0, 2);
+    game = gameApi.takeTurn(game, 2, 0);
+    game = gameApi.takeTurn(game, 0, 3);
+    game = gameApi.takeTurn(game, 3, 0);
 
-    let positions = gameApi.getWinningPositions(game.get('size'), 3, 0, 1);
-    let isWin = gameApi.isVerticalWin(game.get('board'), positions.vertical, 1);
-    expect(isWin).to.equal(true);
+    expect(game.get('winningPlayer')).to.equal(1);
   });
 
   it('can determine somewhat realistic horizontal win', ()=> {
-    let game = gameApi.createNew(1, 7);
-    game = gameApi.takeTurn(game, 0, 0, 1);
-    game = gameApi.takeTurn(game, 0, 1, 2);
-    game = gameApi.takeTurn(game, 0, 3, 1);
-    game = gameApi.takeTurn(game, 0, 4, 1);
-    game = gameApi.takeTurn(game, 0, 5, 1);
-    game = gameApi.takeTurn(game, 0, 6, 2);
-    game = gameApi.takeTurn(game, 0, 2, 1);
+    let game = gameApi.createNew(6, 7);
+    game = gameApi.takeTurn(game, 0, 0);
+    game = gameApi.takeTurn(game, 1, 0);
+    game = gameApi.takeTurn(game, 0, 1);
+    game = gameApi.takeTurn(game, 1, 1);
+    game = gameApi.takeTurn(game, 0, 2);
+    game = gameApi.takeTurn(game, 1, 2);
+    game = gameApi.takeTurn(game, 0, 3);
 
-    let positions = gameApi.getWinningPositions(game.get('size'), 0, 2, 1);
-    let isWin = gameApi.isHorizontalWin(game.get('board'), positions.horizontal, 1);
-    expect(isWin).to.equal(true);
+    expect(game.get('winningPlayer')).to.equal(1);
   });
 
   it('can determine somewhat realistic diagonal win', ()=> {
     let game = gameApi.createNew(6, 7);
-    game = gameApi.takeTurn(game, 0, 0, 2);
-    game = gameApi.takeTurn(game, 1, 1, 1);
-    game = gameApi.takeTurn(game, 2, 2, 1);
-    game = gameApi.takeTurn(game, 3, 3, 1);
-    game = gameApi.takeTurn(game, 4, 4, 1);
-    game = gameApi.takeTurn(game, 5, 5, 2);
+    game = gameApi.takeTurn(game, 0, 0);
+    game = gameApi.takeTurn(game, 0, 1);
+    game = gameApi.takeTurn(game, 1, 1);
+    game = gameApi.takeTurn(game, 0, 2);
+    game = gameApi.takeTurn(game, 2, 2);
+    game = gameApi.takeTurn(game, 0, 3);
+    game = gameApi.takeTurn(game, 3, 3);
 
-    let positions = gameApi.getWinningPositions(game.get('size'), 2, 2, 1);
-    let isWin = gameApi.isDiagonalWin(game.get('board'), positions.diagonal, 1);
-    expect(isWin).to.equal(true);
+    expect(game.get('winningPlayer')).to.equal(1);
   });
 });

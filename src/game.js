@@ -7,11 +7,11 @@ export const init = () => (
       currentPlayerTurn: 1,
       winningPlayer: undefined,
       size: { maxRowIndex: 0, maxColumnIndex: 0 },
+      remainingTurns: 1, //sentinal to prevent end game dialog from rendering on init
       isInit: true,
     })
 );
 
-//TODO: need something to know when there are no more moves
 export const createNew = (rows, columns) => (
   Map({
     board: buildGameBoard(rows, columns),
@@ -19,14 +19,15 @@ export const createNew = (rows, columns) => (
     winningPlayer: undefined,
     size: { maxRowIndex: rows - 1, maxColumnIndex: columns - 1 },
     isInit: false,
+    remainingTurns: (rows * columns),
   })
 );
 
-//TODO: check if move is "valid" (i.e. correct player turn, simulate piece dropping, etc)
 export const takeTurn = (game, row, column) => (
   game.withMutations((g) => {
     const board = g.get('board');
     const curPlayerTurn = game.get('currentPlayerTurn');
+    const curRemainingTurns = game.get('remainingTurns');
 
     const isWin = R.pipe(
       R.curry(getWinningPositions),
@@ -39,7 +40,8 @@ export const takeTurn = (game, row, column) => (
     board[row][column] = curPlayerTurn;
     g.set('board', board);
     g.set('currentPlayerTurn', curPlayerTurn === 1 ? 2 : 1);
-    g.set('winningPlayer', isWin(game.get, row, column, curPlayerTurn) ? curPlayerTurn : undefined);
+    g.set('remainingTurns', curRemainingTurns - 1);
+    g.set('winningPlayer', isWin(game.get('size'), row, column, curPlayerTurn) ? curPlayerTurn : undefined);
   })
 );
 
@@ -96,15 +98,6 @@ export const getWinningPositions = (gameSize, lastMoveRow, lastMoveColumn, playe
   return positions;
 };
 
-export const isVerticalWin = (gameBoard, positions, playerId) =>
-  calculateWin(gameBoard, positions, playerId, winStrategies.vertical);
-
-export const isHorizontalWin = (gameBoard, positions, playerId) =>
-  calculateWin(gameBoard, positions, playerId, winStrategies.horizontal);
-
-export const isDiagonalWin = (gameBoard, positions, playerId) =>
-    calculateWin(gameBoard, positions, playerId, winStrategies.diagonal);
-
 const winStrategies = {
   horizontal: {
     type: 'horizontal',
@@ -112,10 +105,12 @@ const winStrategies = {
     isAdjacent: (curPos, nextPos) => curPos.column - nextPos.column === 1,
   },
   vertical: {
+        type: 'vertical',
         sortFn: (a, b) => b.row - a.row,
         isAdjacent: (curPos, nextPos) => curPos.row - nextPos.row === 1,
       },
   diagonal: {
+    type: 'diagonal',
     sortFn: (a, b) => b.row - a.row,
     isAdjacent: (curPos, nextPos) => {
       const rowDistance = curPos.row - nextPos.row;
@@ -126,34 +121,34 @@ const winStrategies = {
 };
 
 const calculateWin = (gameBoard, positions, player, winStrategy) => {
-  const calculateAdjacentPos = (occupiedPos) => {
+    const calculateAdjacentPos = (occupiedPos) => {
 
-    const reducer = (result, curPos) => {
-      //no-op if at the last occupied position
-      if (result.curIndex !== occupiedPos.length - 1) {
-        let nextPos = occupiedPos[result.curIndex + 1];
+      const reducer = (result, curPos) => {
+        //no-op if at the last occupied position
+        if (result.curIndex !== occupiedPos.length - 1) {
+          let nextPos = occupiedPos[result.curIndex + 1];
 
-        if (winStrategy.isAdjacent(curPos, nextPos)) {
-          result.adjacentPositions++;
+          if (winStrategy.isAdjacent(curPos, nextPos)) {
+            result.adjacentPositions++;
+          }
+
+          result.curIndex++;
         }
 
-        result.curIndex++;
-      }
+        return result;
+      };
 
-      return result;
+      return R.reduce(reducer, { adjacentPositions: 1, curIndex: 0 }, occupiedPos).adjacentPositions;
     };
 
-    return R.reduce(reducer, { adjacentPositions: 1, curIndex: 0 }, occupiedPos).adjacentPositions;
+    const isWin = R.pipe(
+      R.sort(winStrategy.sortFn),
+      R.filter(pos => gameBoard[pos.row][pos.column] === player),
+      calculateAdjacentPos,
+      adjacentPos => adjacentPos === 4);
+
+    return isWin(positions);
   };
-
-  const isWin = R.pipe(
-    R.sort(winStrategy.sortFn),
-    R.filter(pos => gameBoard[pos.row][pos.column] === player),
-    calculateAdjacentPos,
-    adjacentPos => adjacentPos === 4);
-
-  return isWin(positions);
-};
 
 const buildGameBoard = (rows, columns) => {
   let board = [];
