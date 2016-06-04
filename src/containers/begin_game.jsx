@@ -22,7 +22,7 @@ class BeginGame extends React.Component {
 
   render() {
     return (
-      <Modal show={this.state.showModal} hide={this._onClose}>
+      <Modal dialogClassName="begin-game-modal" show={this.state.showModal} hide={this._onClose}>
         <Modal.Header>
           <Modal.Title>
               Welcome To Connect 4!
@@ -36,7 +36,7 @@ class BeginGame extends React.Component {
                 <Col componentClass={ControlLabel} sm={2}>
                   Rows
                 </Col>
-                <Col sm={2}>
+                <Col sm={3}>
                   <FormControl
                     type="text"
                     value={this.state.rows}
@@ -44,14 +44,14 @@ class BeginGame extends React.Component {
                     />
                 </Col>
                 <Col sm={4}>
-                    <HelpBlock>Min: 6, Max: 15</HelpBlock>
+                    <HelpBlock className="begin-game-help">Min: 6, Max: 15</HelpBlock>
                 </Col>
               </FormGroup>
             <FormGroup controlId="columns" validationState={this._validateColumns()}>
               <Col componentClass={ControlLabel} sm={2}>
                 Columns
               </Col>
-              <Col sm={2}>
+              <Col sm={3}>
                 <FormControl
                   type="text"
                   value={this.state.columns}
@@ -59,7 +59,7 @@ class BeginGame extends React.Component {
                 />
               </Col>
               <Col sm={4}>
-                <HelpBlock>Min: 7, Max: 15</HelpBlock>
+                <HelpBlock className="begin-game-help">Min: 7, Max: 15</HelpBlock>
               </Col>
             </FormGroup>
           </Form>
@@ -69,7 +69,7 @@ class BeginGame extends React.Component {
           bsStyle="primary"
           bsSize="large"
           onClick={this._onClose}
-          disabled={ this._validateColumns() === "success" && this._validateRows() === "success" ? false : true} >
+          disabled={ this._validateColumns() === '' && this._validateRows() === '' ? false : true} >
           Start!
         </Button>
       </Modal.Footer>
@@ -87,12 +87,12 @@ class BeginGame extends React.Component {
 
   _validateRows() {
     const rows = this.state.rows;
-    return (rows && (rows >= 6 && rows <= 15)) ? 'success' : 'error';
+    return (rows && (rows >= 6 && rows <= 15)) ? '' : 'error';
   };
 
   _validateColumns() {
     const columns = this.state.columns;
-    return (columns && (columns >= 7 && columns <= 15)) ? 'success' : 'error';
+    return (columns && (columns >= 7 && columns <= 15)) ? '' : 'error';
   }
 
   _handleRows(e) {
