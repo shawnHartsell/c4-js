@@ -4,6 +4,7 @@ import { Button } from 'react-bootstrap';
 const GameBoardCell = ({ playerId, onTakeTurn }) => { //jscs:ignore requireShorthandArrowFunctions
   return (
     <Button
+      className="game-board-cell"
       bsSize='large'
       bsStyle={
         playerId === 1 ? 'primary' :

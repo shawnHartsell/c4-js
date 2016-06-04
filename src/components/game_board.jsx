@@ -9,7 +9,7 @@ const GameBoard = ({ game, onTakeTurn }) => {
      rowIndex={rowIndex}
      onTakeTurn={onTakeTurn} />); });
 
-  return <div>{ rows }</div>;
+  return <div className="game-board">{ rows }</div>;
 };
 
 export default GameBoard;

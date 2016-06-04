@@ -11,7 +11,13 @@ const GameBoardRow = ({ row, rowIndex, onTakeTurn }) => {
         onTakeTurn={() => { onTakeTurn(rowIndex, columnIndex); }} />);
     });
 
-    return <ButtonToolbar>{ cells }</ButtonToolbar>;
+    return (
+      <ButtonToolbar className="game-board-row">
+        <div className="game-cells-container">
+          {cells}
+        </div>
+      </ButtonToolbar>
+    );
   };
 
 export default GameBoardRow;

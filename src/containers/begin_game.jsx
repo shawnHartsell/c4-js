@@ -44,7 +44,7 @@ class BeginGame extends React.Component {
                     />
                 </Col>
                 <Col sm={4}>
-                    <HelpBlock className="begin-game-help">Min: 6, Max: 15</HelpBlock>
+                    <HelpBlock className="begin-game-help">Min: 6, Max: 14</HelpBlock>
                 </Col>
               </FormGroup>
             <FormGroup controlId="columns" validationState={this._validateColumns()}>
@@ -59,7 +59,7 @@ class BeginGame extends React.Component {
                 />
               </Col>
               <Col sm={4}>
-                <HelpBlock className="begin-game-help">Min: 7, Max: 15</HelpBlock>
+                <HelpBlock className="begin-game-help">Min: 7, Max: 19</HelpBlock>
               </Col>
             </FormGroup>
           </Form>
@@ -87,12 +87,12 @@ class BeginGame extends React.Component {
 
   _validateRows() {
     const rows = this.state.rows;
-    return (rows && (rows >= 6 && rows <= 15)) ? '' : 'error';
+    return (rows && (rows >= 6 && rows <= 14)) ? '' : 'error';
   };
 
   _validateColumns() {
     const columns = this.state.columns;
-    return (columns && (columns >= 7 && columns <= 15)) ? '' : 'error';
+    return (columns && (columns >= 7 && columns <= 9)) ? '' : 'error';
   }
 
   _handleRows(e) {

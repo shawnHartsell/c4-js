@@ -1,3 +1,4 @@
+/* begin game modal*/
 .begin-game-modal {
 	width: 27%;
 }
@@ -5,4 +6,28 @@
 .begin-game-help {
 	font-style: italic;
 	font-size: 12
+}
+
+/* game board */
+.game-board {
+    margin: auto;
+    width: 80%;
+    padding: 10px;
+}
+
+.game-board-row {
+	margin: auto;
+    width: 80%;
+}
+
+.game-cells-container {
+	margin: auto;
+    width: 60%;
+}
+
+.game-board-cell {
+	margin: 3px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
 }
