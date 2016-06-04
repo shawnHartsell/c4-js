@@ -121,8 +121,13 @@ const winStrategies = {
 };
 
 const calculateWin = (gameBoard, positions, player, winStrategy) => {
-    const calculateAdjacentPos = (occupiedPos) => {
+    /* for debugging busted diagonal test
+    if(player === 1 && winStrategy.type === 'diagonal') {
+      console.dir(positions);
+    }
+    */
 
+    const calculateAdjacentPos = (occupiedPos) => {
       const reducer = (result, curPos) => {
         //no-op if at the last occupied position
         if (result.curIndex !== occupiedPos.length - 1) {
