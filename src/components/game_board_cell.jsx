@@ -7,8 +7,8 @@ const GameBoardCell = ({ playerId, onTakeTurn }) => { //jscs:ignore requireShort
       className="game-board-cell"
       bsSize='large'
       bsStyle={
-        playerId === 1 ? 'primary' :
-        playerId === 2 ? 'danger' :
+        playerId === 1 ? 'danger' :
+        playerId === 2 ? 'primary' :
         'default'
       }
       onClick={onTakeTurn}

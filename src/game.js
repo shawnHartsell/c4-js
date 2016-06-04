@@ -7,6 +7,7 @@ export const init = () => (
       currentPlayerTurn: 1,
       winningPlayer: undefined,
       size: { maxRowIndex: 0, maxColumnIndex: 0 },
+      isInit: true,
     })
 );
 
@@ -17,6 +18,7 @@ export const createNew = (rows, columns) => (
     currentPlayerTurn: 1,
     winningPlayer: undefined,
     size: { maxRowIndex: rows - 1, maxColumnIndex: columns - 1 },
+    isInit: false,
   })
 );
 

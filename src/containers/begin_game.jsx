@@ -3,6 +3,10 @@ import { Modal, Form, Col, FormGroup, FormControl, ControlLabel, HelpBlock, Butt
 import { connect } from 'react-redux';
 import { createGame } from '../actions';
 
+const mapStateToProps = (state) => ({
+  showDialog: state.get('isInit')
+});
+
 class BeginGame extends React.Component {
   constructor(props) {
     super(props);
@@ -22,7 +26,7 @@ class BeginGame extends React.Component {
 
   render() {
     return (
-      <Modal dialogClassName="begin-game-modal" show={this.state.showModal} hide={this._onClose}>
+      <Modal dialogClassName="begin-game-modal" show={this.props.showDialog} hide={this._onClose}>
         <Modal.Header>
           <Modal.Title>
               Welcome To Connect 4!
@@ -126,4 +130,4 @@ class BeginGame extends React.Component {
   };
 };
 
-export default connect()(BeginGame)
+export default connect(mapStateToProps,null)(BeginGame)
