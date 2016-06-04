@@ -59,7 +59,7 @@ class BeginGame extends React.Component {
                 />
               </Col>
               <Col sm={4}>
-                <HelpBlock className="begin-game-help">Min: 7, Max: 19</HelpBlock>
+                <HelpBlock className="begin-game-help">Min: 7, Max: 9</HelpBlock>
               </Col>
             </FormGroup>
           </Form>
