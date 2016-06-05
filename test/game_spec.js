@@ -57,8 +57,33 @@ describe('game', () => {
     const game = gameApi.createNew(6, 7);
     const positions = gameApi.getWinningPositions(game.get('size'), 5, 0, 1);
     const diagonalPositions = positions.diagonal;
-    console.dir(diagonalPositions);
-    expect(diagonalPositions.length).to.equal(4);
+    const expected = [
+      { row: 5, column: 0 },
+      { row: 3, column: 2 },
+      { row: 4, column: 1 },
+      { row: 2, column: 3 },
+    ];
+
+    expect(diagonalPositions).to.deep.include.members(expected);
+  });
+
+  it('can get diagonal winning positions from center', ()=> {
+    const game = gameApi.createNew(5, 5);
+    const positions = gameApi.getWinningPositions(game.get('size'), 2, 2);
+    const diagonalPositions = positions.diagonal;
+    const expected = [
+      { row: 1, column: 3 },
+      { row: 2, column: 2 },
+      { row: 1, column: 1 },
+      { row: 3, column: 1 },
+      { row: 3, column: 3 },
+      { row: 0, column: 0 },
+      { row: 0, column: 4 },
+      { row: 4, column: 0 },
+      { row: 4, column: 4 },
+    ];
+
+    expect(diagonalPositions).to.deep.include.members(expected);
   });
 
   it('can determine somewhat realistic vertical win', () => {
@@ -100,7 +125,7 @@ describe('game', () => {
     expect(game.get('winningPlayer')).to.equal(1);
   });
 
-  it('can determine another somewhat realistic diagonal win', () => {
+  it('can determine diagonal win from edge', () => {
     let game = gameApi.createNew(6, 7);
     game = gameApi.takeTurn(game, 5, 0);
     game = gameApi.takeTurn(game, 0, 1);

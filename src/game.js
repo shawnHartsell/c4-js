@@ -1,5 +1,6 @@
 import { OrderedMap, List, Map } from 'immutable';
 import * as R from 'ramda';
+import * as math from 'mathjs';
 
 export const init = () => (
     Map({
@@ -90,6 +91,14 @@ export const getWinningPositions = (gameSize, lastMoveRow, lastMoveColumn, playe
       positions.diagonal.push({ row: lastMoveRow - i, column: lastMoveColumn - i });
     }
 
+    if (isPrevRowValid && isNextColumnValid) {
+      positions.diagonal.push({ row: lastMoveRow - i, column: lastMoveColumn + i });
+    }
+
+    if (isNextRowValid && isPrevColumnValid) {
+      positions.diagonal.push({ row: lastMoveRow + i, column: lastMoveColumn - i });
+    }
+
     if (isNextRowValid && isNextColumnValid) {
       positions.diagonal.push({ row: lastMoveRow + i, column: lastMoveColumn + i });
     }
@@ -114,25 +123,23 @@ const winStrategies = {
     sortFn: (a, b) => b.row - a.row,
     isAdjacent: (curPos, nextPos) => {
       const rowDistance = curPos.row - nextPos.row;
-      const columnDistance = curPos.column - nextPos.column;
+      //hacky: sorting is only done by row so there could be a good chance
+      //that cur's columns is less than nextPositions (ex. [5,0] and [4,1])
+      const columnDistance = math.abs(curPos.column - nextPos.column);
       return rowDistance === 1 && columnDistance === 1;
     },
   },
 };
 
 const calculateWin = (gameBoard, positions, player, winStrategy) => {
-    /* for debugging busted diagonal test
-    if(player === 1 && winStrategy.type === 'diagonal') {
-      console.dir(positions);
-    }
-    */
 
     const calculateAdjacentPos = (occupiedPos) => {
+
       const reducer = (result, curPos) => {
         //no-op if at the last occupied position
+
         if (result.curIndex !== occupiedPos.length - 1) {
           let nextPos = occupiedPos[result.curIndex + 1];
-
           if (winStrategy.isAdjacent(curPos, nextPos)) {
             result.adjacentPositions++;
           }
