@@ -1,7 +1,7 @@
 # hai_c4
 A simple client-side Connect Four clone using ES6, React, Redux, and Webpack. This project serves as a reference implementation and will not be actively maintained.
 
-### Depencies
+### Depedencies
 
 * Node.JS (for npm)
 
